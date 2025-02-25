@@ -1,0 +1,110 @@
+{
+    "table": "Evaluation and Treatment of Infants Up to 1 Month of Age with Possible, Probable, or Confirmed Congenital Syphilis",
+    "categories": [
+      { "id": 0,
+        "name": "Proven or Highly Probable Congenital Syphilis",
+        "treatment": [
+          {
+            "preferred": "Aqueous crystalline penicillin G, 50,000 U/kg IV, every 12 hours (for infants 1 week or younger), then every 8 hours for infants older than 1 week, for a total of 10 days of therapy"
+          },
+          {
+            "alternative": "Penicillin G procaine, 50,000 U/kg IM, as a single daily dose for 10 days"
+          }
+        ]
+      },
+      {  "id": 1,
+        "name": "Possible Congenital Syphilis",
+        "findings": [
+          "Normal infant examination",
+          "A serum quantitative nontreponemal serologic titer less than fourfold the birthing parent’s titer at delivery (e.g., maternal titer = 1:8, neonatal titer ≤16)",
+          "ONE OF THE FOLLOWING:",
+          "Birthing parent was not treated, was inadequately treated, or had no documentation of receiving treatment",
+          "Birthing parent was treated with a regimen other than the recommended guideline (i.e., a non-penicillin G regimen)",
+          "Birthing parent received the recommended regimen but treatment was initiated <30 days before delivery"
+        ],
+        "recommended_evaluation": [
+          "CSF analysis (CSF VDRL, cell count, and protein)",
+          "CBC with differential and platelet count",
+          "Long-bone radiography"
+        ],
+        "treatment": [
+          {
+            "preferred": "Aqueous crystalline penicillin G, 50,000 U/kg IV, every 12 hours (1 week or younger), then every 8 hours for infants older than 1 week, for a total of 10 days of therapy"
+          },
+          {
+            "alternative_1": "Penicillin G procaine, 50,000 U/kg IM, as a single daily dose for 10 days"
+          },
+          {
+            "alternative_2": "Penicillin G benzathine, 50,000 U/kg IM, single dose (recommended by some experts, but only if all evaluation components are normal and follow-up is certain)"
+          }
+        ]
+      },
+      { "id": 2,
+        "name": "Congenital Syphilis Less Likely",
+        "findings": [
+          "Normal infant examination",
+          "A serum quantitative nontreponemal serologic titer less than fourfold the birthing parent’s titer at delivery (e.g., maternal titer = 1:8, neonatal titer ≤16)",
+          "Birthing parent was treated during pregnancy with an appropriate regimen, treatment was initiated ≥30 days before delivery, and there is no evidence of reinfection or relapse"
+        ],
+        "recommended_evaluation": "Not recommended",
+        "treatment": [
+          {
+            "preferred": "Penicillin G benzathine, 50,000 U/kg IM, single dose"
+          },
+          {
+            "alternative": "Infants whose birthing parent’s nontreponemal titers decreased at least fourfold after appropriate therapy for early syphilis or remained stable at a low titer (e.g., VDRL ≤1:2; RPR ≤1:4) may be followed every 2–3 months without treatment until the nontreponemal test becomes nonreactive."
+          },
+          {
+            "follow_up": "Nontreponemal antibody titers should decrease by 3 months of age and be nonreactive by 6 months. Infants with increasing or persistent stable titers 6–12 months after treatment should be reevaluated, including a CSF examination, and treated with a 10-day course of parenteral penicillin G."
+          }
+        ]
+      },
+      { "id": 3,
+        "name": "Congenital Syphilis Unlikely",
+        "findings": [
+          "Normal infant examination",
+          "A serum quantitative nontreponemal serologic titer less than fourfold the birthing parent’s titer at delivery",
+          "Birthing parent was adequately treated before pregnancy",
+          "Birthing parent’s nontreponemal serologic titer remained low and stable (i.e., serofast) before and during pregnancy and at delivery (e.g., VDRL ≤1:2 or RPR ≤1:4)"
+        ],
+        "recommended_evaluation": "Not recommended",
+        "treatment": [
+          {
+            "none_required": "None required, but infants with reactive nontreponemal tests should be followed serologically to ensure test results return to negative."
+          },
+          {
+            "optional": "Penicillin G benzathine, 50,000 U/kg IM, single dose can be considered if follow-up is uncertain and infant has a reactive test (some experts recommend this approach)."
+          },
+          {
+            "follow_up": "Neonates with a negative nontreponemal test result at birth and whose birthing parent was seroreactive at delivery should be retested at 3 months to rule out incubating congenital syphilis."
+          }
+        ]
+      },
+      { "id": 4,
+      "name": "Non-reactive RPR/VDRL and Non-Reactive treponemal test",
+      "findings": [
+        "If epidemiologic risk and clinical probability of syphilis is low, no further evaluation is required  ",
+        "If not low, consider repeat RPR or VDRL in 2-4 weeks to differentiate early primary infection from false positive "
+      ]
+    },
+    { "id": 5,
+    "name": "Reactive RPR/VDRL and Non-Reactive treponemal test",
+    "findings": [
+      "False-positive reaction: no further evaluation ",
+      "(if pregnant, repeating with another treponemal test may be appropriate) "
+    ]
+    },
+    { "id": 6,
+    "name": "No Result found, please check inputs",
+    "findings": [
+      "Required Inputs: RPR/VDRL test result, Parent Treatement History, Maternal and Infant Titers and Date, Infant Examination",
+      "Conditional Inputs: Alternative Treponemal Test of RPR/VDRL is non-reactive",
+      "No results found using the algorithm found in the AAP Red Book",
+      "Please reference: http://publications.aap.org/redbook"
+      
+    ]
+  }
+    ],
+    "source": "Downloaded from AAP Red Book: http://publications.aap.org/redbook/book/chapter-pdf/1753196/rbo2024_s3_018_015_en.pdf"
+  }
+  
