@@ -316,14 +316,13 @@ function initializeRPRHandler() {
 
 // Titer Handling
 function initializeTiterHandling() {
-    
     function addNewTiterGroup(container, type) {
         const tab = document.querySelector('.tab.active').dataset.tab;
         const isMaternalTiter = type === 'maternal';
         const prefix = `${tab}_${type}`;
         const labelText = isMaternalTiter ? 'Maternal Titer' : 'Infant Titer';
         const dateLabel = isMaternalTiter ? 'Date of Collection' : 'Date Collected';
-     
+
         const newGroup = document.createElement('div');
         newGroup.className = 'titer-group';
         newGroup.innerHTML = `
@@ -350,10 +349,10 @@ function initializeTiterHandling() {
                 <button type="button" class="add-titer-btn">+</button>
             </div>
         `;
-     
+
         container.appendChild(newGroup);
         updateButtonStates(container);
-     }
+    }
 
     function updateButtonStates(container) {
         const groups = container.querySelectorAll('.titer-group');
@@ -369,10 +368,55 @@ function initializeTiterHandling() {
         });
     }
 
+    function validateMaternalTiters() {
+        const activeTab = document.querySelector('.tab.active').dataset.tab;
+        const container = document.getElementById(`${activeTab}maternalTiterContainer`);
+        const validationMessage = document.getElementById(`${activeTab}TiterValidationMessage`);
+
+        if (!container || !validationMessage) {
+            return;
+        }
+
+        const titerGroups = Array.from(container.querySelectorAll('.titer-group'));
+        if (titerGroups.length < 2) {
+            validationMessage.innerHTML = '';
+            return;
+        }
+
+        // Extract titer values and dates
+        const titers = titerGroups.map(group => {
+            const titerValue = parseInt(group.querySelector(`select[name="${activeTab}_maternal_titer[]"]`).value);
+            const collectionDate = new Date(group.querySelector(`input[name="${activeTab}_maternal_collection_date[]"]`).value);
+            return { titerValue, collectionDate };
+        });
+
+        // Sort by collection date
+        titers.sort((a, b) => a.collectionDate - b.collectionDate);
+        console.log("Titers ", titers);
+        // Check for fourfold or greater increase
+        let messageHTML = '';
+        for (let i = 1; i < titers.length; i++) {
+            if (titers[i].titerValue >= 4 * titers[i - 1].titerValue) {
+                messageHTML = `
+                    <div class="validation-alert warning">
+                        <span class="alert-icon">⚠️</span>
+                        <div class="alert-content">
+                            <strong>Evidence of Maternal Reinfection or Relapse</strong>
+                            <p>There is a fourfold or greater increase in maternal titers.</p>
+                        </div>
+                    </div>
+                `;
+                break;
+            }
+        }
+
+        validationMessage.innerHTML = messageHTML;
+    }
+
     ['maternal', 'infant'].forEach(type => {
         const tab = document.querySelector('.tab.active').dataset.tab;
         const container = document.getElementById(`${tab}${type}TiterContainer`);
-        
+
         if (container) {
             const clone = container.cloneNode(true);
             container.parentNode.replaceChild(clone, container);
@@ -387,10 +431,17 @@ function initializeTiterHandling() {
                         updateButtonStates(clone);
                     }
                 }
+                if (type === 'maternal') {
+                    validateMaternalTiters();
+                }
             });
 
             if (!clone.querySelector('.titer-group')) {
                 addNewTiterGroup(clone, type);
+            }
+
+            if (type === 'maternal') {
+                clone.addEventListener('change', validateMaternalTiters);
             }
         }
     });
