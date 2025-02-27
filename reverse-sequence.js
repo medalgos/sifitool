@@ -484,11 +484,11 @@ function drawChart(data, fourfoldValue, latestMaternalTiter) {
     
     // Prepare data for Chart.js
     const chartData = {
-        labels: data.map(d => d.date.toLocaleDateString()),
+        labels: data.map(d => d.date),
         datasets: [
             {
                 label: 'Maternal Titers',
-                data: maternalData.map(d => d.titer),
+                data: maternalData.map(d => ({ x: d.date, y: d.titer })),
                 borderColor: 'steelblue',
                 backgroundColor: 'steelblue',
                 fill: false,
@@ -496,7 +496,7 @@ function drawChart(data, fourfoldValue, latestMaternalTiter) {
             },
             {
                 label: 'Infant Titers',
-                data: infantData.map(d => d.titer),
+                data: infantData.map(d => ({ x: d.date, y: d.titer })),
                 borderColor: 'crimson',
                 backgroundColor: 'crimson',
                 fill: false,
@@ -509,7 +509,7 @@ function drawChart(data, fourfoldValue, latestMaternalTiter) {
     if (fourfoldValue) {
         chartData.datasets.push({
             label: 'Fourfold from latest maternal titer',
-            data: new Array(data.length).fill(fourfoldValue),
+            data: new Array(data.length).fill({ x: latestMaternalTiter.date, y: fourfoldValue }),
             borderColor: 'purple',
             backgroundColor: 'purple',
             borderDash: [5, 5],
@@ -551,7 +551,7 @@ function drawChart(data, fourfoldValue, latestMaternalTiter) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.dataset.label}: 1:${context.raw}`;
+                            return `${context.dataset.label}: 1:${context.raw.y}`;
                         }
                     }
                 }
