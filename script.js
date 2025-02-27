@@ -35,24 +35,7 @@ function updateRequiredFields() {
     }
 }
 
-// Modify your existing tab switching function
-// function switchTab(event, approach) {
-//     // Existing tab switching code...
-//     document.querySelectorAll('.tab').forEach(tab => {
-//         tab.classList.remove('active');
-//     });
 
-//     event.currentTarget.classList.add('active');
-
-//     document.querySelectorAll('.approach-content').forEach(content => {
-//         content.classList.remove('active');
-//     });
-
-//     document.getElementById(`${approach}-content`).classList.add('active');
-    
-//     // Add this line to update required fields when switching tabs
-//     updateRequiredFields();
-// }
 
 function switchTab(event, approach) {
     // Remove active class from all tabs
@@ -161,25 +144,32 @@ function initializeDateValidation() {
     function validateDates() {
         const activeTab = document.querySelector('.tab.active').dataset.tab;
         const deliveryDateInput = document.getElementById(`${activeTab}DeliveryDate`);
-        const treatmentDateInput = document.getElementById(`${activeTab}TreatmentDate`);
+        const treatmentDate1Input = document.getElementById(`${activeTab}TreatmentDate1`);
+        const treatmentDate2Input = document.getElementById(`${activeTab}TreatmentDate2`);
+        const treatmentDate3Input = document.getElementById(`${activeTab}TreatmentDate3`);
         const validationMessage = document.getElementById(`${activeTab}DateValidationMessage`);
 
-        if (!deliveryDateInput || !treatmentDateInput || !validationMessage) {
+        if (!deliveryDateInput || !treatmentDate1Input || !treatmentDate2Input || !treatmentDate3Input || !validationMessage) {
             return;
         }
 
-        if (!deliveryDateInput.value || !treatmentDateInput.value) {
+        if (!deliveryDateInput.value || !treatmentDate1Input.value || !treatmentDate2Input.value || !treatmentDate3Input.value) {
             validationMessage.innerHTML = '';
             return;
         }
 
         const deliveryDate = new Date(deliveryDateInput.value);
-        const treatmentDate = new Date(treatmentDateInput.value);
-        const daysDifference = Math.floor((deliveryDate - treatmentDate) / (1000 * 3600 * 24));
+        const treatmentDate1 = new Date(treatmentDate1Input.value);
+        const treatmentDate2 = new Date(treatmentDate2Input.value);
+        const treatmentDate3 = new Date(treatmentDate3Input.value);
+        const daysDifference1 = Math.floor((deliveryDate - treatmentDate1) / (1000 * 3600 * 24));
+        const daysDifference2 = Math.floor((treatmentDate2 - treatmentDate1) / (1000 * 3600 * 24));
+        const daysDifference3 = Math.floor((treatmentDate3 - treatmentDate2) / (1000 * 3600 * 24));
 
         let messageHTML = '';
-        if (daysDifference < 0) {
-            messageHTML = `
+
+        if (daysDifference1 < 0) {
+            messageHTML += `
                 <div class="validation-alert error">
                     <span class="alert-icon">⚠️</span>
                     <div class="alert-content">
@@ -188,25 +178,37 @@ function initializeDateValidation() {
                     </div>
                 </div>
             `;
-        } else if (daysDifference < 30) {
-            messageHTML = `
+        } else if (daysDifference1 < 30) {
+            messageHTML += `
                 <div class="validation-alert warning">
                     <span class="alert-icon">⚠️</span>
                     <div class="alert-content">
                         <strong>Treatment Less Than 30 Days Before Delivery</strong>
-                        <p>Treatment was given ${daysDifference} days before delivery.</p>
+                        <p>Treatment was given ${daysDifference1} days before delivery.</p>
                         <p>This is considered inadequate treatment timing.</p>
                     </div>
                 </div>
             `;
         } else {
-            messageHTML = `
+            messageHTML += `
                 <div class="validation-alert success">
                     <span class="alert-icon">✅</span>
                     <div class="alert-content">
                         <strong>Adequate Treatment Timing</strong>
-                        <p>Treatment was given ${daysDifference} days before delivery.</p>
+                        <p>Treatment was given ${daysDifference1} days before delivery.</p>
                         <p>This meets or exceeds the 30-day requirement.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (daysDifference2 > 9 || daysDifference3 > 9) {
+            messageHTML += `
+                <div class="validation-alert warning">
+                    <span class="alert-icon">⚠️</span>
+                    <div class="alert-content">
+                        <strong>Delay Between Treatments</strong>
+                        <p>The guideline specifies that delays beyond 9 days between weekly doses require restarting the course.</p>
                     </div>
                 </div>
             `;
@@ -218,10 +220,14 @@ function initializeDateValidation() {
     // Add event listeners to date inputs
     ['conventional', 'reverse'].forEach(tab => {
         const deliveryDate = document.getElementById(`${tab}DeliveryDate`);
-        const treatmentDate = document.getElementById(`${tab}TreatmentDate`);
+        const treatmentDate1 = document.getElementById(`${tab}TreatmentDate1`);
+        const treatmentDate2 = document.getElementById(`${tab}TreatmentDate2`);
+        const treatmentDate3 = document.getElementById(`${tab}TreatmentDate3`);
         
         if (deliveryDate) deliveryDate.addEventListener('change', validateDates);
-        if (treatmentDate) treatmentDate.addEventListener('change', validateDates);
+        if (treatmentDate1) treatmentDate1.addEventListener('change', validateDates);
+        if (treatmentDate2) treatmentDate2.addEventListener('change', validateDates);
+        if (treatmentDate3) treatmentDate3.addEventListener('change', validateDates);
     });
 }
 

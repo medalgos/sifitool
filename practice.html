@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Syphilis Testing Flowchart</title>
+  <!-- Include D3 -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    /* Basic styling for nodes and links */
+    .node circle {
+      fill: #fff;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+    }
+
+    .node text {
+      font: 12px sans-serif;
+      fill: #333;
+    }
+
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+
+    /* Optional: pointer cursor on node hover */
+    .node:hover {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<script>
+  // Define the hierarchical data for the flowchart:
+  const data = {
+    name: "Syphilis Testing",
+    children: [
+      {
+        name: "Conventional Approach",
+        children: [
+          {
+            name: "Reactive maternal nontreponemal test (RPR or VDRL)",
+            children: [
+              {
+                name: "Nonreactive maternal treponemal test (TP-PA)",
+                children: [
+                  {
+                    name: "False-positive reaction:\nNo further evaluation\n(if pregnant, consider repeating\nanother treponemal test)"
+                  },
+                  {
+                    name: "Evaluate:\nBirthing parent's current or\nhistorical risk for syphilis"
+                  }
+                ]
+              },
+              {
+                name: "Reactive maternal treponemal test (TP-PA)",
+                children: [
+                  {
+                    name: "Evaluate:\nBirthing parent's current or\nhistorical risk for syphilis"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        name: "Reverse-Sequence Screening Approach",
+        children: [
+          {
+            name: "Positive maternal treponemal test (EIA or CIA)",
+            children: [
+              {
+                name: "Reactive maternal RPR or VDRL",
+                children: [
+                  {
+                    name: "Evaluate:\nBirthing parent's current or\nhistorical risk for syphilis"
+                  }
+                ]
+              },
+              {
+                name: "Nonreactive maternal nontreponemal test (RPR or VDRL)",
+                children: [
+                  {
+                    name: "Reactive alternative maternal treponemal test (e.g. TP-PA)",
+                    children: [
+                      {
+                        name: "Evaluate:\nBirthing parent's current or\nhistorical risk for syphilis"
+                      }
+                    ]
+                  },
+                  {
+                    name: "Nonreactive alternative maternal treponemal test",
+                    children: [
+                      {
+                        name: "Biologic false-positive:\nConsider repeat testing if\nat risk or pregnant"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  // Set dimensions and margins for the diagram
+  const margin = { top: 20, right: 120, bottom: 20, left: 120 },
+        width  = 1200 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
+
+  // Append an SVG canvas to the body
+  const svg = d3.select("body")
+    .append("svg")
+      .attr("width",  width  + margin.left + margin.right)
+      .attr("height", height + margin.top  + margin.bottom)
+    .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Create a tree layout
+  const treemap = d3.tree().size([height, width]);
+
+  // Convert data to a hierarchy
+  let root = d3.hierarchy(data, d => d.children);
+
+  // Assigns the x and y position for the nodes
+  root = treemap(root);
+
+  // Get the links (edges) and nodes
+  const links = root.links();
+  const nodes = root.descendants();
+
+  // Draw the links (paths) between nodes
+  svg.selectAll(".link")
+    .data(links)
+    .enter()
+    .append("path")
+      .attr("class", "link")
+      .attr("d", d3.linkHorizontal()
+                  .x(d => d.y)
+                  .y(d => d.x));
+
+  // Draw each node as a group
+  const nodeGroup = svg.selectAll(".node")
+    .data(nodes)
+    .enter()
+    .append("g")
+      .attr("class", "node")
+      .attr("transform", d => `translate(${d.y},${d.x})`);
+
+  // Add circles for the nodes
+  nodeGroup.append("circle")
+    .attr("r", 6);
+
+  // Add labels for the nodes
+  nodeGroup.append("text")
+    .attr("dy", ".35em")
+    .attr("x", d => d.children ? -13 : 13) // position text to left if has children
+    .style("text-anchor", d => d.children ? "end" : "start")
+    .text(d => d.data.name);
+
+</script>
+
+</body>
+</html>

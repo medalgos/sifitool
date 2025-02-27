@@ -234,6 +234,7 @@ async function handleFormSubmit(event) {
         console.log(fullRecommendations);
         displayRecommendations(fullRecommendations);
         addTiterVisualization();
+        // diagram(formdata)
 
     } catch (error) {
         console.error('Form submission error:', error);
