@@ -352,6 +352,7 @@ function initializeTiterHandling() {
 
         container.appendChild(newGroup);
         updateButtonStates(container);
+        attachTiterEventListeners(newGroup, type);
     }
 
     function updateButtonStates(container) {
@@ -368,6 +369,19 @@ function initializeTiterHandling() {
         });
     }
 
+    function attachTiterEventListeners(group, type) {
+        const tab = document.querySelector('.tab.active').dataset.tab;
+        const titerSelect = group.querySelector(`select[name="${tab}_${type}_titer[]"]`);
+        const dateInput = group.querySelector(`input[name="${tab}_${type}_collection_date[]"]`);
+
+        if (titerSelect) {
+            titerSelect.addEventListener('change', validateMaternalTiters);
+        }
+        if (dateInput) {
+            dateInput.addEventListener('change', validateMaternalTiters);
+        }
+    }
+
     function validateMaternalTiters() {
         const activeTab = document.querySelector('.tab.active').dataset.tab;
         const container = document.getElementById(`${activeTab}maternalTiterContainer`);
@@ -379,7 +393,7 @@ function initializeTiterHandling() {
         }
 
         const titerGroups = Array.from(container.querySelectorAll('.titer-group'));
-        console.log(titerGroups)
+        console.log(titerGroups);
         if (titerGroups.length < 2) {
             validationMessage.innerHTML = '';
             return;
@@ -445,6 +459,11 @@ function initializeTiterHandling() {
             if (type === 'maternal') {
                 clone.addEventListener('change', validateMaternalTiters);
             }
+
+            // Attach event listeners to existing titer groups
+            clone.querySelectorAll('.titer-group').forEach(group => {
+                attachTiterEventListeners(group, type);
+            });
         }
     });
 }
