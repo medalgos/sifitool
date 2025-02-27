@@ -245,20 +245,6 @@ async function handleFormSubmit(event) {
 window.handleFormSubmit = handleFormSubmit;
 window.clearTiterVisualization = clearTiterVisualization;
 
-
-// function displayResults(result) {
-//     const resultsDiv = document.getElementById('reverseresultContainer');
-    
-//     if (result.outcome === 'Validation Error') {
-//         // Display validation error with details
-//         resultsDiv.innerHTML = `
-//             <div class="error">
-//                 <h3>${result.outcome}</h3>
-//                 <p>${result.details}</p>
-//             </div>
-//         `;
-//     } else {}};
-
 function displayRecommendations(recommendations) {
     // Get the active tab
     const activeTab = document.querySelector('.tab.active').dataset.tab;
