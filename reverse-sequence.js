@@ -829,7 +829,6 @@ function clearTiterVisualization() {
 }
 
 // Export functions for use in other files
-window.handleReverseSequenceSubmit = handleReverseSequenceSubmit;
 window.clearTiterVisualization = clearTiterVisualization;
 
 function processTiterInformation(activeTab) {
