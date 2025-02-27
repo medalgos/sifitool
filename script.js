@@ -372,12 +372,14 @@ function initializeTiterHandling() {
         const activeTab = document.querySelector('.tab.active').dataset.tab;
         const container = document.getElementById(`${activeTab}maternalTiterContainer`);
         const validationMessage = document.getElementById(`${activeTab}TiterValidationMessage`);
-
+        console.log(container);
+        console.log(validationMessage);
         if (!container || !validationMessage) {
             return;
         }
 
         const titerGroups = Array.from(container.querySelectorAll('.titer-group'));
+        console.log(titerGroups)
         if (titerGroups.length < 2) {
             validationMessage.innerHTML = '';
             return;
