@@ -509,11 +509,16 @@ function drawChart(data, fourfoldValue, latestMaternalTiter) {
     if (fourfoldValue) {
         chartData.datasets.push({
             label: 'Fourfold from latest maternal titer',
-            data: new Array(data.length).fill({ x: latestMaternalTiter.date, y: fourfoldValue }),
+            data: [
+                { x: data[0].date, y: fourfoldValue },
+                { x: data[data.length - 1].date, y: fourfoldValue }
+            ],
+            type: 'scatter',
             borderColor: 'purple',
             backgroundColor: 'purple',
             borderDash: [5, 5],
             fill: false,
+            showLine: true,
             tension: 0.1
         });
     }
@@ -542,8 +547,11 @@ function drawChart(data, fourfoldValue, latestMaternalTiter) {
                     },
                     ticks: {
                         callback: function(value) {
+                            // Format the tick values as 1:x
                             return '1:' + value;
-                        }
+                        },
+                        // Explicitly set the tick values to match the titer options
+                        values: [1, 2, 4, 8, 16, 32, 64, 128, 256]
                     }
                 }
             },
