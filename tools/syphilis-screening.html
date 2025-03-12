@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congenital Syphilis Screening Tool - MedCalc</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/tools/syphilis-tool.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <h1 style="margin: 0;">SifiTool</h1>
+            <button onclick="location.href='../../index.html'" class="btn">Home</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="margin: 0;">Syphilis Screening Values</h2>
+                    <button onclick="resetForm()" class="btn">Reset</button>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" data-tab="conventional">
+                        Conventional Approach
+                    </div>
+                    <div class="tab" data-tab="reverse">
+                        Reverse-Sequence Screening
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-and-notes-container">
+                        <form id="sifiForm" onsubmit="handleFormSubmit(event)">
+
+                            <!-- Conventional Approach Content -->
+                            <div id="conventional-content" class="approach-content active">
+                                <div class="form-section">
+                                    <h3 class="section-title">Conventional Approach</h3>
+                                    <!-- Treponemal Test -->
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="conventionaltreponemalTest">Alternative Treponemal Test (TP-PA):</label>
+                                            <select id="conventionaltreponemalTest" name="conventional_treponemal_test" required>
+                                                <option value="">Select result...</option>
+                                                <option value="reactive">Reactive</option>
+                                                <option value="nonreactive">Nonreactive</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- Maternal Titer Information -->
+                                    <div class="form-row">
+                                        <div id="conventionalmaternalTiterContainer">
+                                            <div class="titer-group">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="conventional_maternal_titer">Maternal Titer:</label>
+                                                        <select id="conventional_maternal_titer" name="conventional_maternal_titer[]" required>
+                                                            <option value="">Select titer...</option>
+                                                            <option value="1">1:1</option>
+                                                            <option value="2">1:2</option>
+                                                            <option value="4">1:4</option>
+                                                            <option value="8">1:8</option>
+                                                            <option value="16">1:16</option>
+                                                            <option value="32">1:32</option>
+                                                            <option value="64">1:64</option>
+                                                            <option value="128">1:128</option>
+                                                            <option value="256">1:256</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="conventional_maternal_collection_date">Date:</label>
+                                                        <input type="date" id="conventional_maternal_collection_date" name="conventional_maternal_collection_date[]" required>
+                                                    </div>
+                                                    <button type="button" class="add-titer-btn">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="conventionalTiterValidationMessage" class="validation-message">
+                                        <!-- Validation message will appear here -->
+                                        <br>
+                                    </div>
+                                    <!-- Infant Titer Information -->
+                                    <div class="form-row">
+                                        <div id="conventionalinfantTiterContainer">
+                                            <div class="titer-group">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="conventional_infant_titer">Infant Titer:</label>
+                                                        <select id="conventional_infant_titer" name="conventional_infant_titer[]" required>
+                                                            <option value="">Select titer...</option>
+                                                            <option value="1">1:1</option>
+                                                            <option value="2">1:2</option>
+                                                            <option value="4">1:4</option>
+                                                            <option value="8">1:8</option>
+                                                            <option value="16">1:16</option>
+                                                            <option value="32">1:32</option>
+                                                            <option value="64">1:64</option>
+                                                            <option value="128">1:128</option>
+                                                            <option value="256">1:256</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="conventional_infant_collection_date">Date:</label>
+                                                        <input type="date" id="conventional_infant_collection_date" name="conventional_infant_collection_date[]" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="conventionalinfantExam">Infant Examination:</label>
+                                            <select id="conventionalinfantExam" name="conventional_infant_exam" required>
+                                                <option value="">Select result...</option>
+                                                <option value="normal">Normal</option>
+                                                <option value="abnormal">Abnormal</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- Treatment Date and Delivery Date -->
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="conventionalDeliveryDate">Delivery Date:</label>
+                                            <input type="date" id="conventionalDeliveryDate" name="conventional_delivery_date">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="conventionalTreatmentDate1">Treatment Date 1:</label>
+                                            <input type="date" id="conventionalTreatmentDate1" name="conventional_treatment_date1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="conventionalTreatmentDate2">Treatment Date 2:</label>
+                                            <input type="date" id="conventionalTreatmentDate2" name="conventional_treatment_date2">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="conventionalTreatmentDate3">Treatment Date 3:</label>
+                                            <input type="date" id="conventionalTreatmentDate3" name="conventional_treatment_date3">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="validation-message" id="conventionalDateValidationMessage">
+                                            <!-- Validation message will appear here -->
+                                        </div>
+                                    </div>
+                                    <!-- Parents History Treatment -->
+                                    <div class="form-row">
+                                        <div class="treatment-options">
+                                            <!-- Hidden radio inputs for form submission -->
+                                            <input type="radio" name="conventional_treatmentHistory" value="adequate-before" id="conventionaladequateBefore" class="treatment-hidden-input" required>
+                                            <input type="radio" name="conventional_treatmentHistory" value="adequate-during" id="conventionaladequateDuring" class="treatment-hidden-input">
+                                            <input type="radio" name="conventional_treatmentHistory" value="inadequate" id="conventionalinadequate" class="treatment-hidden-input">
+                                            <div class="treatment-option" onclick="selectTreatment('conventionaladequateBefore')">
+                                                <strong>Adequate Maternal Treatment Before Pregnancy</strong>
+                                                <div class="treatment-details">
+                                                    - Adequate maternal treatment before pregnancy with low stable (serofast)<br><br>
+                                                    - OR negative titer<br><br>
+                                                    - AND Infant examination normal
+                                                </div>
+                                            </div>
+                                            <div class="treatment-option" onclick="selectTreatment('conventionaladequateDuring')">
+                                                <strong>Adequate Maternal Treatment During Pregnancy</strong>
+                                                <div class="treatment-details">
+                                                    - Adequate maternal penicillin treatment during pregnancy<br><br>
+                                                    - AND was initiated 30 days or more before delivery<br><br>
+                                                    - AND no evidence/concern for reinfection or relapse
+                                                </div>
+                                            </div>
+                                            <div class="treatment-option" onclick="selectTreatment('conventionalinadequate')">
+                                                <strong>Inadequate, Unknown, or High-Risk Maternal Treatment</strong>
+                                                <div class="treatment-details">
+                                                    - None<br><br>
+                                                    - OR Undocumented<br><br>
+                                                    - OR initiated less than 30 days before delivery <br><br>
+                                                    - OR Nonpenicillin drug<br><br>
+                                                    - OR evidence/concern for reinfection/relapse (fourfold or greater increase in maternal titers)<br><br>
+                                                    - Partner recently diagnosed
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-submit">Generate Recommendations</button>
+                                <div id="conventionalresultContainer" style="margin-top: 20px; padding: 10px;"></div>
+                                <div id="conventional-titer-graph" style="margin-top: 20px; padding: 10px;"></div>
+                            </div>
+
+                            <!-- Reverse Sequence Content -->
+                            <div id="reverse-content" class="approach-content">
+                                <!-- Initial Test Section -->
+                                <div class="form-section">
+                                    <h3 class="section-title">Reverse Sequence</h3>
+                                    <!-- Titer information Row  -->
+                                    <div class="form-row">
+                                        <!-- Maternal Titer Information -->
+                                        <div id="reversematernalTiterContainer">
+                                            <div class="titer-group">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="reverse_maternal_titer">Maternal Titer:</label>
+                                                        <select id="reverse_maternal_titer" name="reverse_maternal_titer[]" required>
+                                                            <option value="">Select titer...</option>
+                                                            <option value="1">1:1</option>
+                                                            <option value="2">1:2</option>
+                                                            <option value="4">1:4</option>
+                                                            <option value="8">1:8</option>
+                                                            <option value="16">1:16</option>
+                                                            <option value="32">1:32</option>
+                                                            <option value="64">1:64</option>
+                                                            <option value="128">1:128</option>
+                                                            <option value="256">1:256</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="reverse_maternal_collection_date">Date:</label>
+                                                        <input type="date" id="reverse_maternal_collection_date" name="reverse_maternal_collection_date[]" required>
+                                                    </div>
+                                                    <button type="button" class="add-titer-btn">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reverserprResult">RPR/VDRL Test:</label>
+                                            <select id="reverserprResult" name="reverse_rpr_test" required>
+                                                <option value="">Select result...</option>
+                                                <option value="reactive">Reactive</option>
+                                                <option value="nonreactive">Nonreactive</option>
+                                            </select>
+                                        </div>
+                                    </div> 
+                                    <div id="reverseTiterValidationMessage" class="validation-message">
+                                        <!-- Validation message will appear here -->
+                                    <br>
+                                    </div>
+                                    <div class="form-row">
+                                        <!-- Infant Titer Information -->
+                                        <div id="reverseinfantTiterContainer">
+                                            <div class="titer-group">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="reverse_infant_titer">Infant Titer:</label>
+                                                        <select id="reverse_infant_titer" name="reverse_infant_titer[]" required>
+                                                            <option value="">Select titer...</option>
+                                                            <option value="1">1:1</option>
+                                                            <option value="2">1:2</option>
+                                                            <option value="4">1:4</option>
+                                                            <option value="8">1:8</option>
+                                                            <option value="16">1:16</option>
+                                                            <option value="32">1:32</option>
+                                                            <option value="64">1:64</option>
+                                                            <option value="128">1:128</option>
+                                                            <option value="256">1:256</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="reverse_infant_collection_date">Date:</label>
+                                                        <input type="date" id="reverse_infant_collection_date" name="reverse_infant_collection_date[]" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="reverseinfantExam">Infant Examination:</label>
+                                            <select id="reverseinfantExam" name="reverse_infant_exam" required>
+                                                <option value="">Select result...</option>
+                                                <option value="normal">Normal</option>
+                                                <option value="abnormal">Abnormal</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                     
+                                    <!-- Treatment Date and Delivery Date -->
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="reverseDeliveryDate">Delivery Date:</label>
+                                            <input type="date" id="reverseDeliveryDate" name="reverse_delivery_date">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reverseTreatmentDate1">Treatment Date 1:</label>
+                                            <input type="date" id="reverseTreatmentDate1" name="reverse_treatment_date1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reverseTreatmentDate2">Treatment Date 2:</label>
+                                            <input type="date" id="reverseTreatmentDate2" name="reverse_treatment_date2">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reverseTreatmentDate3">Treatment Date 3:</label>
+                                            <input type="date" id="reverseTreatmentDate3" name="reverse_treatment_date3">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">    
+                                        <div class="validation-message" id="reverseDateValidationMessage">
+                                            <!-- Validation message will appear here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Parents History Treatment-->
+                                     <div class="form-row">
+                                        <div class="treatment-options">
+                                            <!-- Hidden radio inputs for form submission -->
+                                            <input type="radio" name="reverse_treatmentHistory" value="adequate-before" id="reverseadequateBefore" class="treatment-hidden-input" required>
+                                            <input type="radio" name="reverse_treatmentHistory" value="adequate-during" id="reverseadequateDuring" class="treatment-hidden-input">
+                                            <input type="radio" name="reverse_treatmentHistory" value="inadequate" id="reverseinadequate" class="treatment-hidden-input">
+                                            
+                                            <div class="treatment-option" onclick="selectTreatment('reverseadequateBefore')">
+                                                <strong>Adequate Maternal Treatment Before Pregnancy</strong>
+                                                <div class="treatment-details">
+                                                    - Adequate maternal treatment before pregnancy with low stable (serofast)<br><br>
+                                                    - OR negative titer<br><br>
+                                                    - AND Infant examination normal
+                                                </div>
+                                            </div>
+                                    
+
+                                            <div class="treatment-option" onclick="selectTreatment('reverseadequateDuring')">
+                                                <strong>Adequate Maternal Treatment During Pregnancy</strong>
+                                                <div class="treatment-details">
+                                                    - Adequate maternal penicillin treatment during pregnancy<br><br>
+                                                    - AND was initiated 30 days or more before delivery<br><br>
+                                                    - AND no evidence/concern for reinfection or relapse
+                                                </div>
+                                            </div>
+                                    
+
+                                            <div class="treatment-option" onclick="selectTreatment('reverseinadequate')">
+                                                <strong>Inadequate, Unknown, or High-Risk Maternal Treatment</strong>
+                                                <div class="treatment-details">
+                                                    - None<br><br>
+                                                    - OR Undocumented<br><br>
+                                                    - OR initiated less than 30 days before delivery <br><br>
+                                                    - OR Nonpenicillin drug<br><br> 
+                                                    - OR evidence/concern for reinfection/relapse (fourfold or greater increase in maternal titers)<br><br>
+                                                    - Partner recently diagnosed
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>   
+
+                                </div>
+                                <button type="submit" class="btn btn-submit">Generate Recommendations</button>
+                                <div id="reverseresultContainer" style="margin-top: 20px; padding: 10px;"></div>
+                                <div id="reverse-titer-graph" style="margin-top: 20px; padding: 10px;"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div> <!-- Correctly closed card div -->
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                <h3>MedCalc</h3>
+                <p>Evidence-based medical calculators for healthcare professionals.</p>
+            </div>
+            <div>
+                <h3>Tools</h3>
+                <ul>
+                    <li><a href="syphilis-screening.html">Congenital Syphilis Screening</a></li>
+                    <li><a href="#">More tools coming soon</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="../pages/about.html">About Us</a></li>
+                    <li><a href="../pages/contact.html">Contact</a></li>
+                    <li><a href="../pages/disclaimer.html">Disclaimer</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>2025 MedCalc - For educational use only.</span>
+            <span>Version 1.0</span>
+        </div>
+    </footer>
+
+    <!-- JavaScript Dependencies -->
+    <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/tools/syphilis-conventional.js"></script>
+    <script src="/assets/js/tools/syphilis-chart.js"></script>
+    <script src="../assets/js/tools/syphilis-reverse.js"></script>
+    <script src="../assets/js/tools/syphilis-tool.js"></script>
+</body>
+</html>
