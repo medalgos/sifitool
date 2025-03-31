@@ -2,7 +2,7 @@
 // Function to get additional recommendations from results data
 async function getRecommendations(outcomeId) {
     try {
-        const response = await fetch('/assets/data/syphilis-results.json');
+        const response = await fetch('../assets/data/syphilis-results.json');
         const data = await response.json();
         
         // Find matching category by ID instead of name
