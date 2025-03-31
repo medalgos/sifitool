@@ -107,6 +107,14 @@ async function handleFormSubmit(event) {
     }
 }
 
+function clearTiterVisualization() {
+    const existingVisualization = document.getElementById('titer-visualization-container');
+    if (existingVisualization) {
+        existingVisualization.remove();
+    }
+}
+
+
 // Export functions for use in other files
 window.handleFormSubmit = handleFormSubmit;
 window.clearTiterVisualization = clearTiterVisualization;
