@@ -69,7 +69,8 @@ function createTiterVisualization() {
             console.log(`Added infant data point: ${dateInput.value}, ${titerSelect.value}`);
         }
     });
-    
+    console.log('infant data:', infantData);
+    console.log('Maternal data:', maternalData);
     // Combine all data points for plotting
     const allData = [...maternalData, ...infantData];
     
@@ -108,124 +109,289 @@ function createTiterVisualization() {
         console.error('Recommendations container not found');
         return;
     }
-    
+    console.log("All Data:", allData);
+    console.log("Fourfold Value:", fourfoldValue);
     // Draw the graph after the container is added to the DOM
     setTimeout(() => {
-        drawChart(allData, fourfoldValue, latestMaternalTiter);
+        drawTable(allData, fourfoldValue);
     }, 0);
 }
 
-function drawChart(data, fourfoldValue, latestMaternalTiter) {
-    // Load Google Charts
+function drawTable(allData, fourfoldValue) {
+    // Load the Google Charts visualization library
     google.charts.load('current', {'packages':['corechart']});
-    google.charts.setOnLoadCallback(() => {
-        // Get the active tab ID
+    
+    // Set a callback to run when the Google Visualization API is loaded
+    google.charts.setOnLoadCallback(drawChart);
+    
+    /**
+     * Draw the chart with the provided data
+     */
+    function drawChart() {
+        //Create data table for the chart
         const activeTab = document.querySelector('.tab.active').dataset.tab;
         
         // Construct the correct graph container ID based on the active tab
         const graphContainerId = `${activeTab}-titer-graph`;
+        const data = new google.visualization.DataTable();
         
-        // Group data by type (maternal vs infant)
-        const maternalData = data.filter(d => d.label.includes('Maternal'));
-        const infantData = data.filter(d => d.label.includes('Infant'));
+        // Add columns
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'Maternal Titer');
+        data.addColumn('number', 'Infant Titer');
+        data.addColumn('number', 'Fourfold Line');
         
-        // Create a data table
-        var dataTable = new google.visualization.DataTable();
-        dataTable.addColumn('date', 'Date');
-        dataTable.addColumn('number', 'Maternal Titers');
-        dataTable.addColumn('number', 'Infant Titers');
-        
-        // Add rows to the data table
-        maternalData.forEach(d => {
-            dataTable.addRow([d.date, d.titer, null]);
-        });
-        infantData.forEach(d => {
-            dataTable.addRow([d.date, null, d.titer]);
+        // Sort data by date
+        allData.sort(function(a, b) {
+            return new Date(a.date) - new Date(b.date);
         });
         
-        // Define chart options
-        var options = {
+        // Group data by date
+        const groupedData = {};
+        for (let i = 0; i < allData.length; i++) {
+            const item = allData[i];
+            const dateStr = new Date(item.date).toISOString().split('T')[0];
+            
+            if (!groupedData[dateStr]) {
+                groupedData[dateStr] = { 
+                    date: new Date(item.date), 
+                    maternal: null, 
+                    infant: null 
+                };
+            }
+            
+            if (item.label.includes('Maternal')) {
+                groupedData[dateStr].maternal = item.titer;
+            } else if (item.label.includes('Infant')) {
+                groupedData[dateStr].infant = item.titer;
+            }
+        }
+        
+        // Find min and max dates to set chart range
+        const dates = [];
+        for (const key in groupedData) {
+            if (groupedData.hasOwnProperty(key)) {
+                dates.push(groupedData[key].date);
+            }
+        }
+        
+        const minDate = new Date(Math.min.apply(null, dates));
+        const maxDate = new Date(Math.max.apply(null, dates));
+        
+        // Add one week buffer on each side
+        const chartMinDate = new Date(minDate);
+        chartMinDate.setDate(chartMinDate.getDate() - 7);
+        const chartMaxDate = new Date(maxDate);
+        chartMaxDate.setDate(chartMaxDate.getDate() + 7);
+        
+        // Add rows to data table
+        for (const key in groupedData) {
+            if (groupedData.hasOwnProperty(key)) {
+                const item = groupedData[key];
+                data.addRow([
+                    item.date,
+                    item.maternal,
+                    item.infant,
+                    fourfoldValue
+                ]);
+            }
+        }
+        
+        // Determine the maximum titer value to set y-axis scale
+        let maxTiter = 1;
+        for (let i = 0; i < allData.length; i++) {
+            maxTiter = Math.max(maxTiter, allData[i].titer);
+        }
+        
+        // Get ticks for y-axis
+        const ticks = getTiterTicks(getNextTiterValue(maxTiter));
+        
+        // Create the chart options
+        const options = {
             title: 'Titer Visualization',
-            curveType: 'function', // Smooth curves instead of straight lines
-            lineWidth: 3,
-            pointSize: 5,
-            colors: ['steelblue', 'crimson'], // Colors for the two lines
+            height: 400,
+            legend: { position: 'bottom' },
             hAxis: {
                 title: 'Date',
-                titleTextStyle: {
-                    color: '#333',
-                    fontSize: 14,
-                    italic: false
-                },
-                format: 'MMM dd, yyyy', // Format the x-axis as dates
+                format: 'MMM dd, yyyy',
                 viewWindow: {
-                    min: new Date(data[0].date.getTime() - (24 * 60 * 60 * 1000)), // Add one day padding to the start
-                    max: new Date(data[data.length - 1].date.getTime() + (24 * 60 * 60 * 1000)) // Add one day padding to the end
+                    min: chartMinDate,
+                    max: chartMaxDate
                 }
             },
             vAxis: {
-                title: 'Titer Value',
-                titleTextStyle: {
-                    color: '#333',
-                    fontSize: 14,
-                    italic: false
-                },
-                logScale: true, // Use log scale to evenly space powers of 2
-                minValue: 1,
-                maxValue: 256,
-                ticks: [1, 2, 4, 8, 16, 32, 64, 128, 256] // Our specific tick values
-            },
-            legend: {
-                position: 'top'
-            },
-            backgroundColor: {
-                fill: 'white'
-            },
-            chartArea: {
-                width: '80%',
-                height: '70%'
-            },
-            tooltip: {
-                textStyle: {
-                    fontSize: 14
+                title: 'Titer Value 1:Y',
+                logScale: true,
+                ticks: ticks,
+                viewWindow: {
+                    min: 0.5,
+                    max: ticks[ticks.length - 1] * 2
                 }
             },
-            animation: {
-                startup: true,
-                duration: 1000,
-                easing: 'out'
-            }
+            series: {
+                0: { color: '#4CAF50', lineWidth: 3 }, // Maternal (Green for positive association)
+                1: { color: '#FF9800', lineWidth: 3 }, // Infant (Orange for attention)
+                2: { color: '#9C27B0', lineWidth: 2, lineDashStyle: [4, 4] } // Fourfold line (Purple for distinction)
+            },
+            interpolateNulls: true
         };
         
         // Create and draw the chart
-        var chart = new google.visualization.LineChart(document.getElementById(graphContainerId));
-        chart.draw(dataTable, options);
+        // use graphContainerId 
+
+        const chartContainer = document.getElementById(graphContainerId);
+        if (!chartContainer) {
+            console.error('Chart container not found: ' + graphContainerId);
+            return;
+        }
+        const chart = new google.visualization.LineChart(chartContainer);
+        chart.draw(data, options);
+    }
+    
+    /**
+     * Get the next titer value in the standard dilution series
+     * @param {Number} currentTiter - The current titer value
+     * @returns {Number} - The next titer value
+     */
+    function getNextTiterValue(currentTiter) {
+        const titerSeries = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
+        const currentIndex = titerSeries.indexOf(currentTiter);
         
-        // Add a horizontal line for the fourfold value if applicable
-        if (fourfoldValue) {
-            var fourfoldLine = new google.visualization.DataTable();
-            fourfoldLine.addColumn('date', 'Date');
-            fourfoldLine.addColumn('number', 'Fourfold Line');
-            data.forEach(d => {
-                fourfoldLine.addRow([d.date, fourfoldValue]);
-            });
-            var combinedData = google.visualization.data.join(dataTable, fourfoldLine, 'full', [[0, 0]], [1, 2], [1]);
-            options.series = {
-                0: { color: 'steelblue' },
-                1: { color: 'crimson' },
-                2: { color: 'purple', lineDashStyle: [4, 4] }
-            };
-            chart.draw(combinedData, options);
-        } else {
-            chart.draw(dataTable, options);
+        if (currentIndex >= 0 && currentIndex < titerSeries.length - 1) {
+            return titerSeries[currentIndex + 1];
+        } else if (currentTiter > titerSeries[titerSeries.length - 1]) {
+            return currentTiter * 2;
         }
         
-        // Make chart responsive
-        window.addEventListener('resize', function() {
-            chart.draw(dataTable, options);
+        return 256; // Default to 256 if the current titer isn't in the series
+    }
+    
+    /**
+     * Generate titer tick values for the chart's y-axis
+     * @param {Number} maxTiter - The maximum titer value
+     * @returns {Array} - Array of tick values
+     */
+    function getTiterTicks(maxTiter) {
+        const standardTicks = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
+        return standardTicks.filter(function(tick) {
+            return tick <= maxTiter;
         });
-    });
+    }
 }
+
+
+// function drawChart(data, fourfoldValue) {
+//     // Load Google Charts
+//     google.charts.load('current', {'packages':['corechart']});
+//     google.charts.setOnLoadCallback(() => {
+//         // Get the active tab ID
+//         const activeTab = document.querySelector('.tab.active').dataset.tab;
+        
+//         // Construct the correct graph container ID based on the active tab
+//         const graphContainerId = `${activeTab}-titer-graph`;
+        
+//         // Group data by type (maternal vs infant)
+//         const maternalData = data.filter(d => d.label.includes('Maternal'));
+//         const infantData = data.filter(d => d.label.includes('Infant'));
+        
+//         // Create a data table
+//         var dataTable = new google.visualization.DataTable();
+//         dataTable.addColumn('date', 'Date');
+//         dataTable.addColumn('number', 'Maternal Titers');
+//         dataTable.addColumn('number', 'Infant Titers');
+        
+//         // Add rows to the data table
+//         maternalData.forEach(d => {
+//             dataTable.addRow([d.date, d.titer, null]);
+//         });
+//         infantData.forEach(d => {
+//             dataTable.addRow([d.date, null, d.titer]);
+//         });
+        
+//         // Define chart options
+//         var options = {
+//             title: 'Titer Visualization',
+//             curveType: 'function', // Smooth curves instead of straight lines
+//             lineWidth: 3,
+//             pointSize: 5,
+//             colors: ['steelblue', 'crimson'], // Colors for the two lines
+//             hAxis: {
+//                 title: 'Date',
+//                 titleTextStyle: {
+//                     color: '#333',
+//                     fontSize: 14,
+//                     italic: false
+//                 },
+//                 format: 'MMM dd,yyyy', // Format the x-axis as dates
+//                 viewWindow: {
+//                     min: new Date(data[0].date.getTime() - (24 * 60 * 60 * 1000)), // Add one day padding to the start
+//                     max: new Date(data[data.length - 1].date.getTime() + (24 * 60 * 60 * 1000)) // Add one day padding to the end
+//                 },
+//                 ticks: null
+//             },
+//             vAxis: {
+//                 title: 'Titer Value 1:Y',
+//                 titleTextStyle: {
+//                     color: '#333',
+//                     fontSize: 14,
+//                     italic: false
+//                 },
+//                 logScale: true, // Use log scale to evenly space powers of 2
+//                 minValue: 1,
+//                 maxValue: 256,
+//                 ticks: [1, 2, 4, 8, 16, 32, 64, 128, 256] // Our specific tick values
+//             },
+//             legend: {
+//                 position: 'top'
+//             },
+//             backgroundColor: {
+//                 fill: 'white'
+//             },
+//             chartArea: {
+//                 width: '80%',
+//                 height: '70%'
+//             },
+//             tooltip: {
+//                 textStyle: {
+//                     fontSize: 14
+//                 }
+//             },
+//             animation: {
+//                 startup: true,
+//                 duration: 1000,
+//                 easing: 'out'
+//             }
+//         };
+        
+//         // Create and draw the chart
+//         var chart = new google.visualization.LineChart(document.getElementById(graphContainerId));
+//         chart.draw(dataTable, options);
+        
+//         // Add a horizontal line for the fourfold value if applicable
+//         if (fourfoldValue) {
+//             var fourfoldLine = new google.visualization.DataTable();
+//             fourfoldLine.addColumn('date', 'Date');
+//             fourfoldLine.addColumn('number', 'Fourfold Line');
+//             data.forEach(d => {
+//                 fourfoldLine.addRow([d.date, fourfoldValue]);
+//             });
+//             var combinedData = google.visualization.data.join(dataTable, fourfoldLine, 'full', [[0, 0]], [1, 2], [1]);
+//             options.series = {
+//                 0: { color: 'steelblue' },
+//                 1: { color: 'crimson' },
+//                 2: { color: 'purple', lineDashStyle: [4, 4] }
+//             };
+//             chart.draw(combinedData, options);
+//         } else {
+//             chart.draw(dataTable, options);
+//         }
+        
+//         // Make chart responsive
+//         window.addEventListener('resize', function() {
+//             chart.draw(dataTable, options);
+//         });
+//     });
+// }
 
 function addTiterVisualization() {
     createTiterVisualization();
