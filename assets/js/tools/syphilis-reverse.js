@@ -62,6 +62,3 @@ function determineReverseSequenceOutcome(formData) {
 }
 
 window.determineReverseSequenceOutcome = determineReverseSequenceOutcome;
-
-
-
