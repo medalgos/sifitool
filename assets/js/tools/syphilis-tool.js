@@ -352,6 +352,7 @@ function resetForm() {
 
 // Date Validation
 function initializeDateValidation() {
+
     function validateDates() {
         const activeTab = document.querySelector('.tab.active').dataset.tab;
         const deliveryDateInput = document.getElementById(`${activeTab}DeliveryDate`);
@@ -361,35 +362,42 @@ function initializeDateValidation() {
             document.getElementById(`${activeTab}TreatmentDate3`)
         ];
         const validationMessage = document.getElementById(`${activeTab}DateValidationMessage`);
-
-        if (!deliveryDateInput || !validationMessage || treatmentDateInputs.some(input => !input)) {
+    
+        if (!validationMessage) {
             return;
         }
-
-        // If any field is empty, clear message and exit
-        if (!deliveryDateInput.value || treatmentDateInputs.some(input => !input.value)) {
-            validationMessage.innerHTML = '';
+    
+        // Clear previous validation message
+        validationMessage.innerHTML = '';
+    
+        // If delivery date is missing, we can't do validation that requires it
+        if (!deliveryDateInput || !deliveryDateInput.value) {
             return;
         }
-
+    
+        // Filter out empty treatment dates
+        const validTreatmentDates = treatmentDateInputs
+            .filter(input => input && input.value)
+            .map(input => new Date(input.value));
+    
+        // If no treatment dates provided, nothing to validate
+        if (validTreatmentDates.length === 0) {
+            return;
+        }
+    
         const deliveryDate = new Date(deliveryDateInput.value);
-        
-        // Convert treatment date inputs to Date objects
-        let treatmentDates = treatmentDateInputs.map(input => new Date(input.value));
-
+    
         // Sort treatment dates in ascending order
-        treatmentDates.sort((a, b) => a - b);
-
-        // Extract sorted treatment dates
-        const [treatmentDate1, treatmentDate2, treatmentDate3] = treatmentDates;
-
-        // Calculate days between dates
-        const daysDifference1 = Math.floor((deliveryDate - treatmentDate1) / (1000 * 3600 * 24));
-        const daysDifference2 = Math.floor((treatmentDate2 - treatmentDate1) / (1000 * 3600 * 24));
-        const daysDifference3 = Math.floor((treatmentDate3 - treatmentDate2) / (1000 * 3600 * 24));
-
+        validTreatmentDates.sort((a, b) => a - b);
+    
+        console.log("Treatment Dates ", validTreatmentDates);
+    
         let messageHTML = '';
-
+    
+        // Validate the earliest treatment date against delivery date
+        const earliestTreatment = validTreatmentDates[0];
+        const daysDifference1 = Math.floor((deliveryDate - earliestTreatment) / (1000 * 3600 * 24));
+    
         // Validation for treatment date vs. delivery date
         if (daysDifference1 < 0) {
             messageHTML += `
@@ -424,20 +432,30 @@ function initializeDateValidation() {
                 </div>
             `;
         }
-
-        // Validation for gaps between treatment dates
-        if (daysDifference2 > 9 || daysDifference3 > 9) {
-            messageHTML += `
-                <div class="validation-alert warning">
-                    <span class="alert-icon">⚠️</span>
-                    <div class="alert-content">
-                        <strong>Delay Between Treatments</strong>
-                        <p>The guideline specifies that delays beyond 9 days between weekly doses require restarting the course.</p>
-                    </div>
-                </div>
-            `;
+    
+        // Only validate intervals if we have multiple dates
+        if (validTreatmentDates.length > 1) {
+            // Check intervals between consecutive dates
+            for (let i = 1; i < validTreatmentDates.length; i++) {
+                const daysBetween = Math.floor(
+                    (validTreatmentDates[i] - validTreatmentDates[i-1]) / (1000 * 3600 * 24)
+                );
+                
+                if (daysBetween > 9) {
+                    messageHTML += `
+                        <div class="validation-alert warning">
+                            <span class="alert-icon">⚠️</span>
+                            <div class="alert-content">
+                                <strong>Delay Between Treatments</strong>
+                                <p>For late latent syphilis treatment, delays beyond 9 days between weekly doses require restarting the full course of therapy.</p>
+                            </div>
+                        </div>
+                    `;
+                    break; // Only show the warning once
+                }
+            }
         }
-
+    
         validationMessage.innerHTML = messageHTML;
     }
 
