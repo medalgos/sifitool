@@ -296,59 +296,71 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Reset form functionality
-function resetForm() {
-    // Reset all form fields
-    document.getElementById('sifiForm').reset();
-    document.getElementById('reverseresultContainer').innerHTML = '';
-    document.getElementById('conventionalresultContainer').innerHTML = '';
-    clearTiterVisualization();
-    // Clear all validation messages
-    document.querySelectorAll('.validation-message').forEach(message => {
-        message.innerHTML = '';
-    });
+// function resetForm() {
+//     // Reset all form fields
+//     document.getElementById('sifiForm').reset();
+//     document.getElementById('reverseresultContainer').innerHTML = '';
+//     document.getElementById('conventionalresultContainer').innerHTML = '';
+//     clearTiterVisualization();
+//     // Clear all validation messages
+//     document.querySelectorAll('.validation-message').forEach(message => {
+//         message.innerHTML = '';
+//     });
 
-    // Reset treatment options
-    document.querySelectorAll('.treatment-option').forEach(option => {
-        option.classList.remove('selected');
-    });
+//     // Reset treatment options
+//     document.querySelectorAll('.treatment-option').forEach(option => {
+//         option.classList.remove('selected');
+//     });
 
-    // Handle both conventional and reverse tabs
-    ['conventional', 'reverse'].forEach(tab => {
-        // Clear date validation messages
-        const dateValidationMessage = document.getElementById(`${tab}DateValidationMessage`);
-        if (dateValidationMessage) {
-            dateValidationMessage.innerHTML = '';
-        }
+//     // Handle both conventional and reverse tabs
+//     ['conventional', 'reverse'].forEach(tab => {
+//         // Clear date validation messages
+//         const dateValidationMessage = document.getElementById(`${tab}DateValidationMessage`);
+//         if (dateValidationMessage) {
+//             dateValidationMessage.innerHTML = '';
+//         }
 
-        // Reset and hide TP-PA field if it exists
-        const treponemalTest = document.querySelector(`#${tab}-content .form-group #treponemalTest`);
-        if (treponemalTest) {
-            treponemalTest.value = '';
-            treponemalTest.closest('.form-group').style.display = 'none';
-        }
-    });
+//         // Reset and hide TP-PA field if it exists
+//         const treponemalTest = document.querySelector(`#${tab}-content .form-group #treponemalTest`);
+//         if (treponemalTest) {
+//             treponemalTest.value = '';
+//             treponemalTest.closest('.form-group').style.display = 'none';
+//         }
+//     });
 
-    // Reset titer groups
-    ['maternal', 'infant'].forEach(type => {
-        ['conventional', 'reverse'].forEach(tab => {
-            const container = document.getElementById(`${tab}${type}TiterContainer`);
-            if (container) {
-                // Remove all titer groups except the first one
-                const groups = container.querySelectorAll('.titer-group');
-                groups.forEach((group, index) => {
-                    if (index > 0) group.remove();
-                });
+//     // Reset titer groups
+//     ['maternal', 'infant'].forEach(type => {
+//         ['conventional', 'reverse'].forEach(tab => {
+//             const container = document.getElementById(`${tab}${type}TiterContainer`);
+//             if (container) {
+//                 // Remove all titer groups except the first one
+//                 const groups = container.querySelectorAll('.titer-group');
+//                 groups.forEach((group, index) => {
+//                     if (index > 0) group.remove();
+//                 });
                 
-                // Reset the first group
-                const firstGroup = container.querySelector('.titer-group');
-                if (firstGroup) {
-                    firstGroup.querySelector('select').value = '';
-                    firstGroup.querySelector('input[type="date"]').value = '';
-                }
-            }
-        });
-    });
+//                 // Reset the first group
+//                 const firstGroup = container.querySelector('.titer-group');
+//                 if (firstGroup) {
+//                     firstGroup.querySelector('select').value = '';
+//                     firstGroup.querySelector('input[type="date"]').value = '';
+//                 }
+//             }
+//         });
+//     });
+// }
+
+function resetForm() {
+    // Get the active tab
+    const activeTab = document.querySelector('.tab.active').dataset.tab;
+
+    // Store the active tab in localStorage
+    localStorage.setItem('activeTab', activeTab);
+
+    // Refresh the current page
+    location.reload();
 }
+
 
 // Date Validation
 function initializeDateValidation() {
@@ -473,6 +485,39 @@ function initializeDateValidation() {
     });
 }
 
+// COnventional Treponemal Handler
+function initializeConventionalTreponemalHandler() {
+    const treponemalSelect = document.getElementById('conventionaltreponemalTest');
+    if (!treponemalSelect) return;
+
+    const parentRow = treponemalSelect.closest('.form-row');
+    if (!parentRow) return;
+
+    // Create help text message
+    const helpMessage = document.createElement('div');
+    helpMessage.className = 'validation-message';
+    helpMessage.style.display = 'none';
+    helpMessage.innerHTML = `
+        <div class="validation-alert info">
+            <div class="alert-content">
+                <p><strong>False-positive reaction:</strong> no further evaluation.</p>
+                <p>(If pregnant, repeating with another treponemal test may be appropriate.)</p>
+            </div>
+        </div>
+    `;
+
+    // Add help message to the DOM
+    parentRow.after(helpMessage);
+
+    // Add change listener to the treponemal test select element
+    treponemalSelect.addEventListener('change', function () {
+        if (this.value === 'nonreactive') {
+            helpMessage.style.display = 'block';
+        } else {
+            helpMessage.style.display = 'none';
+        }
+    });
+}
 
 // RPR Handler
 function initializeRPRHandler() {
@@ -556,6 +601,9 @@ function initializeRPRHandler() {
         }
     });
 }
+
+
+
 
 // Titer Handling
 function initializeTiterHandling() {
@@ -785,14 +833,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initialize with default tab
-    const defaultTab = document.querySelector('.tab.active');
-    if (defaultTab) {
-        switchTab({ currentTarget: defaultTab }, 'conventional');
-    }
+    // const defaultTab = document.querySelector('.tab.active');
+    // if (defaultTab) {
+    //     switchTab({ currentTarget: defaultTab }, 'conventional');
+    // }
+    const storedTab = localStorage.getItem('activeTab');
 
+    if (storedTab) {
+        // Find the tab element and activate it
+        const tabElement = document.querySelector(`[data-tab="${storedTab}"]`);
+        if (tabElement) {
+            tabElement.click(); // Simulate a click to activate the tab
+        }
+
+        // Clear the stored tab from localStorage
+        localStorage.removeItem('activeTab');
+    } else {
+        // Initialize with the default tab if no stored tab exists
+        const defaultTab = document.querySelector('.tab.active');
+        if (defaultTab) {
+            switchTab({ currentTarget: defaultTab }, 'conventional');
+        }
+    }
     // Initialize all handlers
     initializeDateValidation();
     initializeRPRHandler();
+    initializeConventionalTreponemalHandler();
     initializeTiterHandling();
 
     // Add tab change listener for titer handling
